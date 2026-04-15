@@ -6,6 +6,14 @@ import io
 import streamlit as st
 import pandas as pd
 from pathlib import Path
+try:
+    import pypdf
+except ImportError:
+    pypdf = None
+try:
+    from docx import Document
+except ImportError:
+    Document = None
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -241,6 +249,63 @@ hr { border-color: #d1fae5; margin: 1.5rem 0; }
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+def read_pdf(file_content):
+    """Read PDF from BytesIO and return text as string"""
+    if pypdf is None:
+        raise ImportError("pypdf library not installed. Install with: pip install pypdf")
+    
+    try:
+        pdf_reader = pypdf.PdfReader(io.BytesIO(file_content))
+        text = ""
+        for page_num, page in enumerate(pdf_reader.pages, 1):
+            text += f"--- Page {page_num} ---\n"
+            text += page.extract_text()
+            text += "\n"
+        
+        if not text.strip():
+            raise ValueError("PDF file contains no extractable text")
+        
+        return text
+    except Exception as e:
+        raise Exception(f"Error reading PDF: {str(e)}")
+
+
+def read_docx(file_content):
+    """Read DOCX from BytesIO and return text as string"""
+    if Document is None:
+        raise ImportError("python-docx library not installed. Install with: pip install python-docx")
+    
+    try:
+        doc = Document(io.BytesIO(file_content))
+        text = ""
+        for para in doc.paragraphs:
+            text += para.text + "\n"
+        
+        if not text.strip():
+            raise ValueError("DOCX file contains no extractable text")
+        
+        return text
+    except Exception as e:
+        raise Exception(f"Error reading DOCX: {str(e)}")
+
+
+def load_file(file_content, file_ext):
+    """Load any supported file type (CSV, PDF, DOCX) and return content with type info"""
+    file_ext = file_ext.lower()
+    
+    if file_ext == '.csv':
+        df = pd.read_csv(io.BytesIO(file_content))
+        return df, 'dataframe'
+    elif file_ext == '.pdf':
+        text = read_pdf(file_content)
+        return text, 'text'
+    elif file_ext == '.docx':
+        text = read_docx(file_content)
+        return text, 'text'
+    else:
+        raise ValueError(f"Unsupported file format: {file_ext}. Supported formats: .csv, .pdf, .docx")
+
+
 def detect_columns(df):
     """Detect income, expense, amount, and category columns heuristically."""
     cols = [c.lower() for c in df.columns]
@@ -302,7 +367,7 @@ def fmt(val):
 
 
 # ── Crew runner ───────────────────────────────────────────────────────────────
-def run_crew(df: pd.DataFrame, file_name: str) -> str:
+def run_crew(data, content_type: str, file_name: str) -> str:
     from dotenv import load_dotenv
     load_dotenv()
     from crewai import Agent, Task, Crew, Process
@@ -315,7 +380,14 @@ def run_crew(df: pd.DataFrame, file_name: str) -> str:
         base_url="https://api.groq.com/openai/v1",
     )
 
-    preview = df.head(50).to_dict()
+    if content_type == 'dataframe':
+        preview = data.head(50).to_dict()
+        data_preview = f"DATA PREVIEW:\n{preview}"
+        file_info = f"CSV: {file_name}\n"
+    else:  # text
+        data_preview_text = data[:1000] + "..." if len(data) > 1000 else data
+        data_preview = f"DOCUMENT CONTENT:\n{data_preview_text}"
+        file_info = f"Document: {file_name}\n"
 
     analyzer = Agent(
         role="Financial Data Analyzer",
@@ -342,12 +414,10 @@ def run_crew(df: pd.DataFrame, file_name: str) -> str:
         description=f"""
 Analyze this financial dataset and provide a structured overview.
 
-CSV: {file_name}
+{file_info}
+{data_preview}
 
-DATA PREVIEW:
-{preview}
-
-Compute:
+Compute/Identify:
 1. Total income
 2. Total expenses
 3. Net balance
@@ -422,12 +492,12 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 📋 Supported CSV Formats")
+    st.markdown("### 📋 Supported File Formats")
     st.markdown("""
     <div style='font-size:.8rem;color:#4a7a5a;line-height:1.8'>
-    ✅ Income + Expense columns<br>
-    ✅ Amount + Type column<br>
-    ✅ Any numeric financial data<br><br>
+    ✅ CSV - Income/Expense reports<br>
+    ✅ PDF - Financial statements<br>
+    ✅ DOCX - Budget documents<br><br>
     <span style='font-family:Space Mono,monospace;font-size:.73rem'>
     Date,Description,Income,Expense<br>
     2024-01,Sales,5000,<br>
@@ -448,126 +518,142 @@ st.markdown("""
 
 # ── Upload ────────────────────────────────────────────────────────────────────
 uploaded = st.file_uploader(
-    "Upload financial CSV",
-    type=["csv"],
+    "Upload financial file (CSV, PDF, or DOCX)",
+    type=["csv", "pdf", "docx"],
     label_visibility="collapsed",
 )
 
-df = None
+data = None
+content_type = None
 
 if uploaded:
     try:
+        file_ext = Path(uploaded.name).suffix.lower()
         raw = uploaded.read()
-        df = pd.read_csv(io.BytesIO(raw))
+        data, content_type = load_file(raw, file_ext)
 
-        if df.empty:
-            st.error("❌ The CSV file is empty.")
-            st.stop()
+        if content_type == 'dataframe':
+            df = data
+            
+            if df.empty:
+                st.error("❌ The CSV file is empty.")
+                st.stop()
 
-        detected = detect_columns(df)
-        kpis = compute_kpis(df, detected)
+            detected = detect_columns(df)
+            kpis = compute_kpis(df, detected)
 
-        # ── KPI Cards ──
-        st.markdown('<div class="sec-title">💰 Financial Overview</div>', unsafe_allow_html=True)
+        if content_type == 'dataframe':
+            df = data
 
-        net = kpis.get("net_balance")
-        net_class = "positive" if net and net >= 0 else "negative"
-        net_label = "Surplus" if net and net >= 0 else "Deficit"
+            # ── KPI Cards ──
+            st.markdown('<div class="sec-title">💰 Financial Overview</div>', unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div class="kpi-row">
-          <div class="kpi-card">
-            <div class="kpi-label">Total Income</div>
-            <div class="kpi-value positive">{fmt(kpis.get('total_income'))}</div>
-            <div class="kpi-sub">Revenue / Credits</div>
-          </div>
-          <div class="kpi-card red">
-            <div class="kpi-label">Total Expenses</div>
-            <div class="kpi-value negative">{fmt(kpis.get('total_expenses'))}</div>
-            <div class="kpi-sub">Costs / Debits</div>
-          </div>
-          <div class="kpi-card {'blue' if net and net >= 0 else 'amber'}">
-            <div class="kpi-label">Net Balance</div>
-            <div class="kpi-value {net_class}">{fmt(net)}</div>
-            <div class="kpi-sub">{net_label}</div>
-          </div>
-          <div class="kpi-card amber">
-            <div class="kpi-label">Total Rows</div>
-            <div class="kpi-value">{len(df):,}</div>
-            <div class="kpi-sub">{len(df.columns)} columns</div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # ── Numeric column summary table ──
-        numeric_cols = df.select_dtypes(include="number").columns.tolist()
-        if numeric_cols:
-            st.markdown('<div class="sec-title">📊 Column Summary</div>', unsafe_allow_html=True)
-
-            rows_html = ""
-            for col in numeric_cols:
-                total = df[col].sum()
-                avg   = df[col].mean()
-                mn    = df[col].min()
-                mx    = df[col].max()
-                cls   = "pos" if total >= 0 else "neg"
-                sign  = "+" if total >= 0 else ""
-                rows_html += f"""
-                <tr>
-                  <td><strong>{col}</strong></td>
-                  <td class="{cls}">{sign}${total:,.2f}</td>
-                  <td>${avg:,.2f}</td>
-                  <td>${mn:,.2f}</td>
-                  <td>${mx:,.2f}</td>
-                </tr>"""
+            net = kpis.get("net_balance")
+            net_class = "positive" if net and net >= 0 else "negative"
+            net_label = "Surplus" if net and net >= 0 else "Deficit"
 
             st.markdown(f"""
-            <table class="fin-table">
-              <thead><tr>
-                <th>Column</th><th>Total</th><th>Average</th><th>Min</th><th>Max</th>
-              </tr></thead>
-              <tbody>{rows_html}</tbody>
-            </table>
+            <div class="kpi-row">
+              <div class="kpi-card">
+                <div class="kpi-label">Total Income</div>
+                <div class="kpi-value positive">{fmt(kpis.get('total_income'))}</div>
+                <div class="kpi-sub">Revenue / Credits</div>
+              </div>
+              <div class="kpi-card red">
+                <div class="kpi-label">Total Expenses</div>
+                <div class="kpi-value negative">{fmt(kpis.get('total_expenses'))}</div>
+                <div class="kpi-sub">Costs / Debits</div>
+              </div>
+              <div class="kpi-card {'blue' if net and net >= 0 else 'amber'}">
+                <div class="kpi-label">Net Balance</div>
+                <div class="kpi-value {net_class}">{fmt(net)}</div>
+                <div class="kpi-sub">{net_label}</div>
+              </div>
+              <div class="kpi-card amber">
+                <div class="kpi-label">Total Rows</div>
+                <div class="kpi-value">{len(df):,}</div>
+                <div class="kpi-sub">{len(df.columns)} columns</div>
+              </div>
+            </div>
             """, unsafe_allow_html=True)
 
-        # ── Charts ──
-        if numeric_cols:
-            st.markdown('<div class="sec-title">📈 Visualizations</div>', unsafe_allow_html=True)
+            # ── Numeric column summary table ──
+            numeric_cols = df.select_dtypes(include="number").columns.tolist()
+            if numeric_cols:
+                st.markdown('<div class="sec-title">📊 Column Summary</div>', unsafe_allow_html=True)
 
-            col_a, col_b = st.columns(2)
+                rows_html = ""
+                for col in numeric_cols:
+                    total = df[col].sum()
+                    avg   = df[col].mean()
+                    mn    = df[col].min()
+                    mx    = df[col].max()
+                    cls   = "pos" if total >= 0 else "neg"
+                    sign  = "+" if total >= 0 else ""
+                    rows_html += f"""
+                    <tr>
+                      <td><strong>{col}</strong></td>
+                      <td class="{cls}">{sign}${total:,.2f}</td>
+                      <td>${avg:,.2f}</td>
+                      <td>${mn:,.2f}</td>
+                      <td>${mx:,.2f}</td>
+                    </tr>"""
 
-            with col_a:
-                st.markdown('<div class="chart-card">', unsafe_allow_html=True)
-                st.caption("Column Totals")
-                totals = df[numeric_cols].sum()
-                st.bar_chart(totals, color="#4ade80")
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                <table class="fin-table">
+                  <thead><tr>
+                    <th>Column</th><th>Total</th><th>Average</th><th>Min</th><th>Max</th>
+                  </tr></thead>
+                  <tbody>{rows_html}</tbody>
+                </table>
+                """, unsafe_allow_html=True)
 
-            with col_b:
-                # Date/trend chart if date column exists
-                date_col = detected.get("date")
-                if date_col and date_col in df.columns:
-                    try:
-                        df["_date"] = pd.to_datetime(df[date_col], errors="coerce")
-                        trend = df.groupby("_date")[numeric_cols].sum()
-                        st.markdown('<div class="chart-card">', unsafe_allow_html=True)
-                        st.caption(f"Trend over {date_col}")
-                        st.line_chart(trend, color=["#4ade80", "#f87171", "#60a5fa"][:len(numeric_cols)])
-                        st.markdown('</div>', unsafe_allow_html=True)
-                    except Exception:
-                        st.markdown('<div class="chart-card">', unsafe_allow_html=True)
-                        st.caption("Column Distribution")
-                        st.area_chart(df[numeric_cols].describe().loc[["mean", "min", "max"]].T, color="#4ade80")
-                        st.markdown('</div>', unsafe_allow_html=True)
-                else:
+            # ── Charts ──
+            if numeric_cols:
+                st.markdown('<div class="sec-title">📈 Visualizations</div>', unsafe_allow_html=True)
+
+                col_a, col_b = st.columns(2)
+
+                with col_a:
                     st.markdown('<div class="chart-card">', unsafe_allow_html=True)
-                    st.caption("Row-level trend (first 50 rows)")
-                    st.line_chart(df[numeric_cols].head(50), color=["#4ade80", "#f87171", "#60a5fa"][:len(numeric_cols)])
+                    st.caption("Column Totals")
+                    totals = df[numeric_cols].sum()
+                    st.bar_chart(totals, color="#4ade80")
                     st.markdown('</div>', unsafe_allow_html=True)
 
-        # ── Raw data preview ──
-        with st.expander("👁️  Preview raw data"):
-            st.dataframe(df, width='stretch', height=260)
+                with col_b:
+                    # Date/trend chart if date column exists
+                    date_col = detected.get("date")
+                    if date_col and date_col in df.columns:
+                        try:
+                            df["_date"] = pd.to_datetime(df[date_col], errors="coerce")
+                            trend = df.groupby("_date")[numeric_cols].sum()
+                            st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+                            st.caption(f"Trend over {date_col}")
+                            st.line_chart(trend, color=["#4ade80", "#f87171", "#60a5fa"][:len(numeric_cols)])
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        except Exception:
+                            st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+                            st.caption("Column Distribution")
+                            st.area_chart(df[numeric_cols].describe().loc[["mean", "min", "max"]].T, color="#4ade80")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+                        st.caption("Row-level trend (first 50 rows)")
+                        st.line_chart(df[numeric_cols].head(50), color=["#4ade80", "#f87171", "#60a5fa"][:len(numeric_cols)])
+                        st.markdown('</div>', unsafe_allow_html=True)
+
+            # ── Raw data preview ──
+            with st.expander("👁️  Preview raw data"):
+                st.dataframe(df, width='stretch', height=260)
+        
+        else:  # text content (PDF or DOCX)
+            st.markdown('<div class="sec-title">📄 Document Loaded</div>', unsafe_allow_html=True)
+            file_type = "PDF" if uploaded.name.endswith('.pdf') else "DOCX"
+            st.info(f"✅ {file_type} file loaded ({len(data)} characters). Sending to AI for analysis...")
+            with st.expander("👁️  Preview document content"):
+                preview_text = data[:500] + "..." if len(data) > 500 else data
+                st.text(preview_text)
 
         st.markdown("---")
         st.markdown("""
@@ -587,7 +673,7 @@ if uploaded:
 
             with st.spinner("🤖 Agents at work — Analyzer → Reporter…"):
                 try:
-                    result = run_crew(df, uploaded.name)
+                    result = run_crew(data, content_type, uploaded.name)
                 except Exception as e:
                     st.error(f"❌ Error: {e}")
                     st.stop()
@@ -612,17 +698,26 @@ if uploaded:
                     )
 
                 with col2:
-                    # Quick stats export
-                    stats_lines = f"FINANCIAL QUICK STATS\n{'='*50}\n\n"
-                    stats_lines += f"File: {uploaded.name}\n"
-                    stats_lines += f"Rows: {len(df)} | Columns: {len(df.columns)}\n\n"
-                    if kpis.get("total_income") is not None:
-                        stats_lines += f"Total Income:   {fmt(kpis['total_income'])}\n"
-                        stats_lines += f"Total Expenses: {fmt(kpis['total_expenses'])}\n"
-                    stats_lines += f"Net Balance:    {fmt(kpis.get('net_balance'))}\n\n"
-                    stats_lines += "Column Totals:\n"
-                    for col in numeric_cols:
-                        stats_lines += f"  {col}: ${df[col].sum():,.2f}\n"
+                    # Quick stats export (for CSV files)
+                    if content_type == 'dataframe':
+                        df = data
+                        stats_lines = f"FINANCIAL QUICK STATS\n{'='*50}\n\n"
+                        stats_lines += f"File: {uploaded.name}\n"
+                        stats_lines += f"Rows: {len(df)} | Columns: {len(df.columns)}\n\n"
+                        if kpis.get("total_income") is not None:
+                            stats_lines += f"Total Income:   {fmt(kpis['total_income'])}\n"
+                            stats_lines += f"Total Expenses: {fmt(kpis['total_expenses'])}\n"
+                        stats_lines += f"Net Balance:    {fmt(kpis.get('net_balance'))}\n\n"
+                        numeric_cols = df.select_dtypes(include="number").columns.tolist()
+                        stats_lines += "Column Totals:\n"
+                        for col in numeric_cols:
+                            stats_lines += f"  {col}: ${df[col].sum():,.2f}\n"
+                    else:
+                        # For document files, just show file info
+                        stats_lines = f"FINANCIAL DOCUMENT ANALYSIS\n{'='*50}\n\n"
+                        stats_lines += f"File: {uploaded.name}\n"
+                        stats_lines += f"Type: {'PDF' if uploaded.name.endswith('.pdf') else 'DOCX'}\n"
+                        stats_lines += f"Content length: {len(data)} characters\n"
 
                     st.download_button(
                         "⬇️ Download Stats (.txt)",
@@ -635,7 +730,7 @@ if uploaded:
             st.success("✅ Report generated successfully!")
 
     except Exception as e:
-        st.error(f"❌ Failed to read CSV: {e}")
+        st.error(f"❌ Failed to read file: {e}")
 
 else:
     # Empty state
@@ -644,10 +739,10 @@ else:
     border:2px dashed #86efac;color:#aaa;box-shadow:0 2px 16px rgba(0,80,30,.06)">
       <div style="font-size:4rem;margin-bottom:1rem">📂</div>
       <div style="font-size:1.25rem;font-weight:700;color:#2d6a40;margin-bottom:.4rem">
-        Upload a financial CSV to get started
+        Upload a financial file to get started
       </div>
       <div style="font-size:.88rem;color:#86a893">
-        Supports income/expense reports, transaction logs, budget sheets
+        Supports CSV, PDF, and DOCX formats - income/expense reports, budget sheets, and financial documents
       </div>
     </div>
     """, unsafe_allow_html=True)

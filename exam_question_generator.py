@@ -5,17 +5,28 @@ from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, Process
 from crewai.llm import LLM
 import sys
+import argparse
+from typing import Optional
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
 
 # Initialize Groq LLM
-llm = LLM(
-    model="llama-3.1-8b-instant",
-    api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0.6,
-    base_url="https://api.groq.com/openai/v1"
-)
+def get_llm(api_key: Optional[str] = None) -> LLM:
+    """Initialize and return Groq LLM instance with error handling."""
+    key = api_key or os.getenv("GROQ_API_KEY")
+    if not key:
+        raise ValueError("GROQ_API_KEY not found in environment or parameters")
+    
+    return LLM(
+        model="llama-3.1-8b-instant",
+        api_key=key,
+        temperature=0.6,
+        base_url="https://api.groq.com/openai/v1"
+    )
+
+llm = get_llm()
 
 
 # =========================
@@ -25,10 +36,16 @@ llm = LLM(
 class ExamAgents:
     """Agents for exam question generation and review"""
 
-    def __init__(self, llm_instance):
+    def __init__(self, llm_instance: LLM) -> None:
+        """Initialize agents with LLM instance.
+        
+        Args:
+            llm_instance: The language model to use for agent reasoning
+        """
         self.llm = llm_instance
 
-    def question_generator(self):
+    def question_generator(self) -> Agent:
+        """Create an agent specialized in generating exam questions."""
         return Agent(
             role="Exam Question Designer",
             goal="Generate high-quality exam questions aligned with learning objectives",
@@ -40,7 +57,8 @@ class ExamAgents:
             llm=self.llm
         )
 
-    def question_reviewer(self):
+    def question_reviewer(self) -> Agent:
+        """Create an agent specialized in reviewing exam question quality."""
         return Agent(
             role="Assessment Quality Reviewer",
             goal="Evaluate exam questions for clarity, difficulty, and educational alignment",
@@ -52,7 +70,8 @@ class ExamAgents:
             llm=self.llm
         )
 
-    def question_editor(self):
+    def question_editor(self) -> Agent:
+        """Create an agent specialized in refining exam questions."""
         return Agent(
             role="Exam Question Editor",
             goal="Refine exam questions based on review feedback",
@@ -72,7 +91,7 @@ class ExamAgents:
 class ExamTasks:
     """Tasks for question generation, review, and refinement"""
 
-    def generation_task(self, agent, subject, topic, difficulty):
+    def generation_task(self, agent: Agent, subject: str, topic: str, difficulty: str) -> Task:
         return Task(
             description=f"""
             Generate 6 exam questions for the following:
@@ -99,7 +118,7 @@ class ExamTasks:
             - Appropriate difficulty"""
         )
 
-    def review_task(self, agent, generation_task):
+    def review_task(self, agent: Agent, generation_task: Task) -> Task:
         return Task(
             description="""
             Review the generated exam questions.
@@ -122,7 +141,7 @@ class ExamTasks:
             context=[generation_task]
         )
 
-    def refinement_task(self, agent, generation_task, review_task):
+    def refinement_task(self, agent: Agent, generation_task: Task, review_task: Task) -> Task:
         return Task(
             description="""
             Improve and rewrite the exam questions based on the reviewer’s feedback.
@@ -151,13 +170,22 @@ class ExamTasks:
 class ExamQuestionCrew:
     """Orchestrates exam question generation and review"""
 
-    def __init__(self, subject, topic, difficulty):
+    def __init__(self, subject: str, topic: str, difficulty: str, output_file: Optional[str] = None) -> None:
+        """Initialize the exam question crew.
+        
+        Args:
+            subject: Course or subject name
+            topic: Specific topic to generate questions for
+            difficulty: Difficulty level (easy, medium, hard)
+            output_file: Optional file path to save results
+        """
         self.subject = subject
         self.topic = topic
         self.difficulty = difficulty
         self.llm = llm
+        self.output_file = output_file
 
-    def run(self):
+    def run(self) -> str:
         print("\n" + "=" * 60)
         print("📘 EXAM QUESTION GENERATOR & REVIEWER")
         print("=" * 60)
@@ -191,8 +219,33 @@ class ExamQuestionCrew:
         print("\n" + "=" * 60)
         print("✅ FINAL EXAM QUESTIONS")
         print("=" * 60)
+        print(str(result))
+
+        # Save to file if specified
+        if self.output_file:
+            self._save_results(result)
 
         return result
+
+    def _save_results(self, result: str) -> None:
+        """Save exam questions to a file.
+        
+        Args:
+            result: The generated exam questions text
+        """
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = self.output_file.replace(".txt", f"_{timestamp}.txt")
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(f"Subject: {self.subject}\n")
+                f.write(f"Topic: {self.topic}\n")
+                f.write(f"Difficulty: {self.difficulty}\n")
+                f.write(f"Generated: {datetime.now().isoformat()}\n")
+                f.write("\n" + "=" * 60 + "\n\n")
+                f.write(str(result))
+            print(f"\n💾 Results saved to: {filename}")
+        except IOError as e:
+            print(f"\n⚠️  Warning: Could not save to file: {e}")
 
 
 # =========================
@@ -200,8 +253,6 @@ class ExamQuestionCrew:
 # =========================
 
 if __name__ == "__main__":
-    import argparse
-
     parser = argparse.ArgumentParser(
         description="Exam Question Generator & Reviewer (CrewAI + Groq)"
     )
@@ -214,9 +265,16 @@ if __name__ == "__main__":
         default="medium",
         help="Difficulty level"
     )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Optional file path to save results"
+    )
 
     args = parser.parse_args()
 
+    # Validate required environment variable
     if not os.getenv("GROQ_API_KEY"):
         print("❌ ERROR: GROQ_API_KEY not found in .env file")
         sys.exit(1)
@@ -225,11 +283,17 @@ if __name__ == "__main__":
         crew = ExamQuestionCrew(
             subject=args.subject,
             topic=args.topic,
-            difficulty=args.difficulty
+            difficulty=args.difficulty,
+            output_file=args.output
         )
         output = crew.run()
-        print("\n" + str(output))
 
+    except ValueError as e:
+        print(f"\n❌ CONFIGURATION ERROR: {str(e)}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\n\n⚠️  Process interrupted by user")
+        sys.exit(0)
     except Exception as e:
         print(f"\n❌ ERROR: {str(e)}")
         import traceback

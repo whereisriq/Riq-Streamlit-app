@@ -7,6 +7,14 @@ from crewai.llm import LLM
 import pandas as pd
 import sys
 from pathlib import Path
+try:
+    import pypdf
+except ImportError:
+    pypdf = None
+try:
+    from docx import Document
+except ImportError:
+    Document = None
 
 # Load environment variables
 load_dotenv()
@@ -44,6 +52,74 @@ def read_csv(file_path):
     except Exception as e:
         raise Exception(f"Error reading CSV {file_path}: {str(e)}")
 
+
+def read_pdf(file_path):
+    """Read PDF and return text as string"""
+    if pypdf is None:
+        raise ImportError("pypdf library not installed. Install with: pip install pypdf")
+    
+    try:
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"PDF file not found: {file_path}")
+        
+        file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+        if file_size_mb > 50:
+            print(f"   ⚠️  Large file detected ({file_size_mb:.1f} MB), processing may take longer")
+        
+        pdf_reader = pypdf.PdfReader(file_path)
+        text = ""
+        for page_num, page in enumerate(pdf_reader.pages, 1):
+            text += f"--- Page {page_num} ---\n"
+            text += page.extract_text()
+            text += "\n"
+        
+        if not text.strip():
+            raise ValueError("PDF file contains no extractable text")
+        
+        return text
+    except Exception as e:
+        raise Exception(f"Error reading PDF {file_path}: {str(e)}")
+
+
+def read_docx(file_path):
+    """Read DOCX and return text as string"""
+    if Document is None:
+        raise ImportError("python-docx library not installed. Install with: pip install python-docx")
+    
+    try:
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"DOCX file not found: {file_path}")
+        
+        file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+        if file_size_mb > 50:
+            print(f"   ⚠️  Large file detected ({file_size_mb:.1f} MB), processing may take longer")
+        
+        doc = Document(file_path)
+        text = ""
+        for para in doc.paragraphs:
+            text += para.text + "\n"
+        
+        if not text.strip():
+            raise ValueError("DOCX file contains no extractable text")
+        
+        return text
+    except Exception as e:
+        raise Exception(f"Error reading DOCX {file_path}: {str(e)}")
+
+
+def load_file(file_path):
+    """Load any supported file type (CSV, PDF, DOCX) and return content with type info"""
+    file_ext = Path(file_path).suffix.lower()
+    
+    if file_ext == '.csv':
+        return read_csv(file_path), 'dataframe'
+    elif file_ext == '.pdf':
+        return read_pdf(file_path), 'text'
+    elif file_ext == '.docx':
+        return read_docx(file_path), 'text'
+    else:
+        raise ValueError(f"Unsupported file format: {file_ext}. Supported formats: .csv, .pdf, .docx")
+
 class FinancialAgents:
     """Define agents for financial report analysis"""
     
@@ -76,19 +152,26 @@ class FinancialAgents:
 class FinancialTasks:
     """Define tasks for financial report processing"""
     
-    def analysis_task(self, agent, df, file_name):
-        """Task to analyze the CSV data"""
-        preview = df.head(50).to_dict()  # limit preview for token safety
+    def analysis_task(self, agent, data, file_name, content_type):
+        """Task to analyze the financial data"""
+        if content_type == 'dataframe':
+            preview = data.head(50).to_dict()  # limit preview for token safety
+            data_preview = f"DATA PREVIEW:\n{preview}"
+            file_info = f"CSV: {file_name}\n"
+        else:  # text
+            # Limit text preview to 1000 chars for token safety
+            preview = data[:1000] + "..." if len(data) > 1000 else data
+            data_preview = f"DOCUMENT CONTENT:\n{preview}"
+            file_info = f"Document: {file_name}\n"
+        
         return Task(
             description=f"""
             Analyze this financial dataset and provide a structured overview.
 
-            CSV: {file_name}
+            {file_info}
+            {data_preview}
 
-            DATA PREVIEW:
-            {preview}
-
-            Compute:
+            Compute/Identify:
             1. Total income
             2. Total expenses
             3. Net balance
@@ -131,27 +214,33 @@ class FinancialTasks:
 class FinancialCrew:
     """Orchestrate the financial report analysis"""
     
-    def __init__(self, csv_file):
-        self.csv_file = csv_file
+    def __init__(self, file_path):
+        self.file_path = file_path
         self.llm = llm
+        self.content_type = None  # 'dataframe' or 'text'
+        self.data = None
         
         print("\n" + "="*60)
-        print("📂 LOADING FINANCIAL CSV")
+        print(f"📂 LOADING FILE: {Path(file_path).name}")
         print("="*60)
         
-        if not os.path.exists(csv_file):
-            raise FileNotFoundError(f"File not found: {csv_file}")
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
         
         try:
-            self.df = read_csv(csv_file)
+            self.data, self.content_type = load_file(file_path)
             
-            if self.df.empty:
-                raise ValueError("CSV file contains no data rows")
-            
-            print(f"✅ CSV loaded successfully ({len(self.df)} rows, {len(self.df.columns)} columns)")
-            print(f"   Columns: {', '.join(self.df.columns)}")
+            if self.content_type == 'dataframe':
+                if self.data.empty:
+                    raise ValueError("CSV file contains no data rows")
+                print(f"✅ CSV loaded successfully ({len(self.data)} rows, {len(self.data.columns)} columns)")
+                print(f"   Columns: {', '.join(self.data.columns)}")
+            else:  # text
+                text_preview = self.data[:200] + "..." if len(self.data) > 200 else self.data
+                print(f"✅ Document loaded successfully ({len(self.data)} characters)")
+                print(f"   Preview: {text_preview}")
         except Exception as e:
-            print(f"❌ Failed to load CSV: {str(e)}")
+            print(f"❌ Failed to load file: {str(e)}")
             raise
     
     def run(self):
@@ -169,7 +258,7 @@ class FinancialCrew:
         print("="*60)
         
         tasks = FinancialTasks()
-        analysis_task = tasks.analysis_task(analyzer, self.df, Path(self.csv_file).name)
+        analysis_task = tasks.analysis_task(analyzer, self.data, Path(self.file_path).name, self.content_type)
         reporting_task = tasks.reporting_task(reporter, analysis_task)
         print("✓ Tasks created: Analysis & Reporting")
         
@@ -204,15 +293,16 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(
-        description='Financial Report Analyzer Agent',
+        description='Financial Report Analyzer Agent (supports CSV, PDF, and DOCX)',
         epilog="""
 Examples:
   python financial_analyzer.py report.csv
-  python financial_analyzer.py report.csv --output summary.txt
+  python financial_analyzer.py financial_report.pdf
+  python financial_analyzer.py budget.docx --output summary.txt
         """
     )
     
-    parser.add_argument('csv_file', help='Path to financial CSV (income/expenses)')
+    parser.add_argument('file', help='Path to financial file (CSV, PDF, or DOCX)')
     parser.add_argument('--output', '-o', help='Output file path (optional)')
     
     args = parser.parse_args()
@@ -222,15 +312,21 @@ Examples:
         print("❌ ERROR: GROQ_API_KEY not found in .env file!")
         sys.exit(1)
     
+    # Check file extension
+    file_ext = Path(args.file).suffix.lower()
+    if file_ext not in ['.csv', '.pdf', '.docx']:
+        print(f"❌ ERROR: Unsupported file format '{file_ext}'. Supported formats: .csv, .pdf, .docx")
+        sys.exit(1)
+    
     print("\n" + "="*60)
     print("FINANCIAL REPORT ANALYZER - CrewAI + Groq")
     print("="*60)
     print(f"📊 Model: groq/llama-3.1-8b-instant")
-    print(f"📁 CSV: {args.csv_file}")
+    print(f"📁 File: {args.file} ({file_ext.upper()})")
     print("="*60)
     
     try:
-        crew = FinancialCrew(args.csv_file)
+        crew = FinancialCrew(args.file)
         result = crew.run()
         
         print("\n" + "="*60)
