@@ -1,0 +1,18 @@
+# Virtual environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+ENV/
+
+# Streamlit specific
+.streamlit/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
