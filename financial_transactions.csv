@@ -1,0 +1,101 @@
+Transaction_ID,Date,Category,Type,Merchant,Amount,Payment_Method,Status,Description
+TXN100082,2024-01-03,Freelance,Income,Client B,1479.57,Cash,Pending,Income - Freelance at Client B
+TXN100098,2024-01-04,Shopping,Expense,Amazon,-76.13,Debit Card,Completed,Expense - Shopping at Amazon
+TXN100076,2024-01-07,Insurance,Expense,Auto Insurance Co,-223.86,Debit Card,Completed,Expense - Insurance at Auto Insurance Co
+TXN100070,2024-01-13,Freelance,Income,Client B,925.99,Credit Card,Completed,Income - Freelance at Client B
+TXN100019,2024-01-22,Travel,Expense,Travel Agency,-1205.52,Bank Transfer,Completed,Expense - Travel at Travel Agency
+TXN100068,2024-01-24,Gift,Income,Generic Merchant,163.79,Cash,Completed,Income - Gift at Generic Merchant
+TXN100088,2024-01-30,Savings,Expense,Savings Account,-760.51,Mobile Payment,Completed,Expense - Savings at Savings Account
+TXN100064,2024-02-01,Groceries,Expense,Walmart,-103.68,Credit Card,Completed,Expense - Groceries at Walmart
+TXN100025,2024-02-07,Miscellaneous,Expense,Generic Merchant,-86.09,Credit Card,Completed,Expense - Miscellaneous at Generic Merchant
+TXN100039,2024-02-10,Utilities,Expense,Gas Company,-75.25,Bank Transfer,Completed,Expense - Utilities at Gas Company
+TXN100037,2024-02-13,Refund,Income,Generic Merchant,178.87,Mobile Payment,Failed,Income - Refund at Generic Merchant
+TXN100089,2024-02-14,Investment Income,Income,Dividend Payment,176.84,Bank Transfer,Completed,Income - Investment Income at Dividend Payment
+TXN100008,2024-02-19,Rent,Expense,Generic Merchant,-1224.34,Credit Card,Completed,Expense - Rent at Generic Merchant
+TXN100009,2024-02-19,Miscellaneous,Expense,Generic Merchant,-30.52,Credit Card,Completed,Expense - Miscellaneous at Generic Merchant
+TXN100029,2024-02-20,Shopping,Expense,Clothing Store,-109.35,Mobile Payment,Completed,Expense - Shopping at Clothing Store
+TXN100049,2024-02-20,Debt Payment,Expense,Loan Payment,-446.16,Mobile Payment,Completed,Expense - Debt Payment at Loan Payment
+TXN100031,2024-02-23,Shopping,Expense,Clothing Store,-82.66,Cash,Pending,Expense - Shopping at Clothing Store
+TXN100062,2024-02-26,Savings,Expense,Investment Account,-412.6,Debit Card,Completed,Expense - Savings at Investment Account
+TXN100057,2024-02-28,Entertainment,Expense,Spotify,-65.25,Debit Card,Completed,Expense - Entertainment at Spotify
+TXN100083,2024-02-29,Groceries,Expense,Kroger,-43.28,Bank Transfer,Completed,Expense - Groceries at Kroger
+TXN100027,2024-03-01,Savings,Expense,Investment Account,-826.01,Debit Card,Completed,Expense - Savings at Investment Account
+TXN100056,2024-03-07,Salary,Income,Organization XYZ,2609.46,Cash,Completed,Income - Salary at Organization XYZ
+TXN100059,2024-03-11,Insurance,Expense,Health Insurance Co,-369.83,Debit Card,Completed,Expense - Insurance at Health Insurance Co
+TXN100001,2024-03-15,Transportation,Expense,Public Transit,-93.09,Mobile Payment,Completed,Expense - Transportation at Public Transit
+TXN100092,2024-03-18,Rent,Expense,Generic Merchant,-1232.18,Debit Card,Completed,Expense - Rent at Generic Merchant
+TXN100043,2024-03-21,Miscellaneous,Expense,Generic Merchant,-95.47,Cash,Completed,Expense - Miscellaneous at Generic Merchant
+TXN100063,2024-03-25,Gift,Income,Generic Merchant,83.63,Bank Transfer,Completed,Income - Gift at Generic Merchant
+TXN100014,2024-03-26,Miscellaneous,Expense,Generic Merchant,-30.97,Credit Card,Pending,Expense - Miscellaneous at Generic Merchant
+TXN100012,2024-03-30,Dining Out,Expense,McDonalds,-55.83,Mobile Payment,Completed,Expense - Dining Out at McDonalds
+TXN100013,2024-03-31,Entertainment,Expense,Netflix,-142.64,Cash,Completed,Expense - Entertainment at Netflix
+TXN100078,2024-04-04,Investment Income,Income,Interest Payment,190.73,Mobile Payment,Completed,Income - Investment Income at Interest Payment
+TXN100046,2024-04-08,Groceries,Expense,Kroger,-91.06,Cash,Completed,Expense - Groceries at Kroger
+TXN100034,2024-04-20,Gift,Income,Generic Merchant,95.88,Credit Card,Completed,Income - Gift at Generic Merchant
+TXN100095,2024-04-22,Refund,Income,Generic Merchant,122.5,Mobile Payment,Completed,Income - Refund at Generic Merchant
+TXN100033,2024-05-06,Transportation,Expense,Shell Gas,-87.62,Debit Card,Completed,Expense - Transportation at Shell Gas
+TXN100005,2024-05-15,Savings,Expense,Investment Account,-351.0,Mobile Payment,Completed,Expense - Savings at Investment Account
+TXN100035,2024-05-20,Freelance,Income,Freelance Platform,598.17,Bank Transfer,Completed,Income - Freelance at Freelance Platform
+TXN100044,2024-05-22,Miscellaneous,Expense,Generic Merchant,-17.97,Cash,Completed,Expense - Miscellaneous at Generic Merchant
+TXN100084,2024-05-30,Shopping,Expense,Clothing Store,-48.42,Bank Transfer,Completed,Expense - Shopping at Clothing Store
+TXN100041,2024-06-01,Subscriptions,Expense,Streaming Service,-23.26,Mobile Payment,Completed,Expense - Subscriptions at Streaming Service
+TXN100065,2024-06-05,Groceries,Expense,Whole Foods,-133.48,Bank Transfer,Completed,Expense - Groceries at Whole Foods
+TXN100017,2024-06-06,Investment Income,Income,Interest Payment,313.7,Credit Card,Completed,Income - Investment Income at Interest Payment
+TXN100099,2024-06-09,Healthcare,Expense,Dentist,-102.93,Bank Transfer,Completed,Expense - Healthcare at Dentist
+TXN100045,2024-06-10,Insurance,Expense,Auto Insurance Co,-466.66,Credit Card,Completed,Expense - Insurance at Auto Insurance Co
+TXN100075,2024-06-15,Debt Payment,Expense,Mortgage Payment,-199.45,Cash,Completed,Expense - Debt Payment at Mortgage Payment
+TXN100077,2024-06-18,Freelance,Income,Client A,1322.84,Cash,Failed,Income - Freelance at Client A
+TXN100100,2024-06-20,Shopping,Expense,Clothing Store,-73.38,Bank Transfer,Completed,Expense - Shopping at Clothing Store
+TXN100080,2024-06-22,Insurance,Expense,Life Insurance Co,-453.96,Cash,Completed,Expense - Insurance at Life Insurance Co
+TXN100011,2024-06-26,Freelance,Income,Freelance Platform,1446.79,Mobile Payment,Completed,Income - Freelance at Freelance Platform
+TXN100090,2024-06-30,Insurance,Expense,Auto Insurance Co,-242.64,Credit Card,Completed,Expense - Insurance at Auto Insurance Co
+TXN100055,2024-07-02,Insurance,Expense,Health Insurance Co,-171.95,Credit Card,Completed,Expense - Insurance at Health Insurance Co
+TXN100042,2024-07-04,Savings,Expense,Investment Account,-948.91,Debit Card,Pending,Expense - Savings at Investment Account
+TXN100081,2024-07-11,Travel,Expense,Rental Car,-1132.72,Bank Transfer,Completed,Expense - Travel at Rental Car
+TXN100050,2024-07-12,Shopping,Expense,Amazon,-44.23,Mobile Payment,Completed,Expense - Shopping at Amazon
+TXN100006,2024-07-15,Transportation,Expense,Car Repair Shop,-45.75,Cash,Completed,Expense - Transportation at Car Repair Shop
+TXN100054,2024-07-21,Healthcare,Expense,Doctor Office,-140.31,Credit Card,Completed,Expense - Healthcare at Doctor Office
+TXN100071,2024-07-25,Rent,Expense,Generic Merchant,-1231.46,Mobile Payment,Completed,Expense - Rent at Generic Merchant
+TXN100038,2024-07-26,Investment Income,Income,Brokerage Account,473.55,Mobile Payment,Completed,Income - Investment Income at Brokerage Account
+TXN100040,2024-07-28,Investment Income,Income,Interest Payment,164.21,Cash,Completed,Income - Investment Income at Interest Payment
+TXN100024,2024-07-29,Education,Expense,Online Course,-144.26,Credit Card,Completed,Expense - Education at Online Course
+TXN100026,2024-07-31,Gift,Income,Generic Merchant,470.18,Bank Transfer,Pending,Income - Gift at Generic Merchant
+TXN100067,2024-07-31,Rent,Expense,Generic Merchant,-1816.78,Cash,Completed,Expense - Rent at Generic Merchant
+TXN100002,2024-08-15,Transportation,Expense,Public Transit,-83.35,Mobile Payment,Completed,Expense - Transportation at Public Transit
+TXN100010,2024-08-16,Dining Out,Expense,Pizza Hut,-74.12,Credit Card,Completed,Expense - Dining Out at Pizza Hut
+TXN100053,2024-08-27,Investment Income,Income,Dividend Payment,488.07,Bank Transfer,Completed,Income - Investment Income at Dividend Payment
+TXN100085,2024-08-27,Savings,Expense,Emergency Fund,-593.45,Cash,Completed,Expense - Savings at Emergency Fund
+TXN100073,2024-08-28,Freelance,Income,Client A,971.38,Mobile Payment,Completed,Income - Freelance at Client A
+TXN100087,2024-08-28,Debt Payment,Expense,Loan Payment,-390.55,Debit Card,Completed,Expense - Debt Payment at Loan Payment
+TXN100074,2024-09-02,Insurance,Expense,Health Insurance Co,-130.62,Debit Card,Completed,Expense - Insurance at Health Insurance Co
+TXN100004,2024-09-10,Gift,Income,Generic Merchant,157.13,Credit Card,Completed,Income - Gift at Generic Merchant
+TXN100058,2024-09-13,Freelance,Income,Freelance Platform,1070.04,Mobile Payment,Completed,Income - Freelance at Freelance Platform
+TXN100007,2024-09-16,Entertainment,Expense,Spotify,-102.15,Bank Transfer,Completed,Expense - Entertainment at Spotify
+TXN100061,2024-09-17,Freelance,Income,Freelance Platform,1700.97,Credit Card,Pending,Income - Freelance at Freelance Platform
+TXN100016,2024-09-19,Gift,Income,Generic Merchant,308.15,Credit Card,Completed,Income - Gift at Generic Merchant
+TXN100048,2024-09-24,Transportation,Expense,Public Transit,-79.17,Bank Transfer,Completed,Expense - Transportation at Public Transit
+TXN100020,2024-10-01,Miscellaneous,Expense,Generic Merchant,-89.09,Cash,Completed,Expense - Miscellaneous at Generic Merchant
+TXN100069,2024-10-06,Refund,Income,Generic Merchant,159.12,Cash,Completed,Income - Refund at Generic Merchant
+TXN100093,2024-10-07,Debt Payment,Expense,Mortgage Payment,-168.08,Debit Card,Completed,Expense - Debt Payment at Mortgage Payment
+TXN100047,2024-10-09,Transportation,Expense,Public Transit,-38.39,Bank Transfer,Completed,Expense - Transportation at Public Transit
+TXN100028,2024-10-11,Education,Expense,Online Course,-84.72,Debit Card,Completed,Expense - Education at Online Course
+TXN100030,2024-10-11,Dining Out,Expense,Starbucks,-61.82,Credit Card,Completed,Expense - Dining Out at Starbucks
+TXN100003,2024-10-12,Gift,Income,Generic Merchant,488.09,Credit Card,Completed,Income - Gift at Generic Merchant
+TXN100023,2024-10-21,Travel,Expense,Airline,-721.38,Mobile Payment,Completed,Expense - Travel at Airline
+TXN100052,2024-10-22,Travel,Expense,Travel Agency,-355.48,Debit Card,Completed,Expense - Travel at Travel Agency
+TXN100079,2024-10-25,Debt Payment,Expense,Mortgage Payment,-417.0,Mobile Payment,Completed,Expense - Debt Payment at Mortgage Payment
+TXN100022,2024-10-28,Utilities,Expense,Internet Provider,-152.16,Cash,Completed,Expense - Utilities at Internet Provider
+TXN100018,2024-10-29,Subscriptions,Expense,Gym Membership,-32.4,Debit Card,Completed,Expense - Subscriptions at Gym Membership
+TXN100091,2024-10-29,Entertainment,Expense,Movie Theater,-52.94,Cash,Completed,Expense - Entertainment at Movie Theater
+TXN100072,2024-11-07,Entertainment,Expense,Movie Theater,-94.39,Bank Transfer,Pending,Expense - Entertainment at Movie Theater
+TXN100036,2024-11-10,Transportation,Expense,Car Repair Shop,-45.66,Mobile Payment,Completed,Expense - Transportation at Car Repair Shop
+TXN100051,2024-11-12,Healthcare,Expense,Doctor Office,-285.83,Debit Card,Pending,Expense - Healthcare at Doctor Office
+TXN100060,2024-11-13,Refund,Income,Generic Merchant,133.07,Bank Transfer,Completed,Income - Refund at Generic Merchant
+TXN100015,2024-11-14,Subscriptions,Expense,Magazine Subscription,-18.83,Bank Transfer,Completed,Expense - Subscriptions at Magazine Subscription
+TXN100066,2024-11-22,Freelance,Income,Client A,769.13,Mobile Payment,Completed,Income - Freelance at Client A
+TXN100097,2024-12-01,Salary,Income,Organization XYZ,4511.97,Mobile Payment,Completed,Income - Salary at Organization XYZ
+TXN100021,2024-12-07,Groceries,Expense,Walmart,-133.9,Cash,Completed,Expense - Groceries at Walmart
+TXN100032,2024-12-18,Shopping,Expense,Amazon,-54.44,Credit Card,Completed,Expense - Shopping at Amazon
+TXN100096,2024-12-20,Groceries,Expense,Kroger,-104.61,Debit Card,Completed,Expense - Groceries at Kroger
+TXN100086,2024-12-24,Utilities,Expense,Water Utility,-111.58,Bank Transfer,Completed,Expense - Utilities at Water Utility
+TXN100094,2024-12-26,Travel,Expense,Airline,-857.63,Cash,Completed,Expense - Travel at Airline

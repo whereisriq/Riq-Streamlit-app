@@ -1,0 +1,46 @@
+{
+    "student_name": "Oguntoye Tobi",
+    "preferences": {
+        "explanation_style": "technical",
+        "difficulty": "medium"
+    },
+    "topics_studied": [
+        "Photosynthesis",
+        "computer architecture",
+        "The generation of computers",
+        "Linear programming",
+        "AI automation"
+    ],
+    "progress_notes": [
+        {
+            "topic": "Photosynthesis",
+            "note": "Studied 'Photosynthesis' with advanced difficulty using visual style.",
+            "timestamp": "2026-02-06 17:39:56"
+        },
+        {
+            "topic": "Photosynthesis",
+            "note": "Studied 'Photosynthesis' with medium difficulty using detailed style.",
+            "timestamp": "2026-02-06 17:41:55"
+        },
+        {
+            "topic": "computer architecture",
+            "note": "Studied 'computer architecture' with medium difficulty using detailed style.",
+            "timestamp": "2026-02-06 18:04:43"
+        },
+        {
+            "topic": "The generation of computers",
+            "note": "Studied 'The generation of computers' with medium difficulty using detailed style.",
+            "timestamp": "2026-02-06 18:15:08"
+        },
+        {
+            "topic": "Linear programming",
+            "note": "Studied 'Linear programming' with medium difficulty using technical style.",
+            "timestamp": "2026-04-13 10:45:15"
+        },
+        {
+            "topic": "AI automation",
+            "note": "Studied 'AI automation' with medium difficulty using technical style.",
+            "timestamp": "2026-04-15 11:34:55"
+        }
+    ]
+}

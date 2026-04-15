@@ -1,0 +1,15 @@
+LESSON PLAN QUICK REFERENCE
+============================================================
+
+Topic: Fractions
+Grade: Grade 4
+Subject: Mathematics
+Duration: 4 weeks (20 lessons)
+
+Weekly Overview:
+  Week 1: Introduction and Foundations
+  Week 2: Skill Development
+  Week 3: Application and Deepening
+  Week 4: Synthesis and Assessment
+
+Full plan available in: console output

@@ -1,0 +1,12 @@
+QUICK STATISTICS
+============================================================
+
+Total Students: 30
+Subjects Analyzed: Math, English, Science, History, Geography
+
+Subject Averages:
+  Math: 67.90 (Range: 45-93)
+  English: 76.27 (Range: 50-95)
+  Science: 70.97 (Range: 48-96)
+  History: 70.93 (Range: 52-94)
+  Geography: 75.63 (Range: 55-92)

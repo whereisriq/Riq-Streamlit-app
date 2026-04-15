@@ -1,0 +1,13 @@
+Artificial intelligence is becoming an important part of modern education. 
+Universities are increasingly using AI tools to support teaching, learning, 
+and administrative processes. These tools can help students receive personalized 
+feedback, assist instructors with grading, and improve access to learning resources.
+
+However, the use of AI in education also raises concerns. Issues such as data privacy, 
+academic integrity, and over-reliance on automated systems must be carefully managed. 
+Institutions are responsible for ensuring that AI is used ethically and transparently.
+
+When implemented thoughtfully, artificial intelligence has the potential to enhance 
+learning experiences and improve educational outcomes. Universities must balance 
+innovation with responsibility to ensure that AI supports, rather than replaces, 
+human-centered education.

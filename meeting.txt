@@ -1,0 +1,37 @@
+Meeting Start Time: 10:00 AM
+
+Sarah (Project Manager): Good morning everyone. Thanks for joining the weekly project sync.
+The goal today is to review our progress on the Learning Management System upgrade,
+discuss the delayed features, and confirm next steps for the next sprint.
+
+John (Backend Lead): From the backend side, the user authentication module is complete.
+However, the reporting feature is about a week behind schedule due to API integration issues.
+
+Sarah: Thanks John. Does that delay affect the overall timeline?
+
+John: Slightly. If we don’t resolve it by Friday, we may need to push the testing phase by one week.
+
+Emily (Frontend Developer): On the frontend, the dashboard redesign is finished.
+We’ve received positive feedback from internal testing. We’re ready to hand it over for QA.
+
+Sarah: That’s great. Mark, any updates from QA?
+
+Mark (QA Lead): QA has started testing the dashboard. No major issues so far,
+but we’ll need final backend APIs before we can complete end-to-end testing.
+
+Sarah: Understood. Let’s talk action items.
+John, can you prioritize resolving the API issues by Friday?
+
+John: Yes, I’ll focus on that and provide an update by end of day Friday.
+
+Sarah: Emily, please coordinate with QA and prepare documentation for the new dashboard.
+
+Emily: Sure, I’ll send the documentation by Thursday.
+
+Sarah: Any other concerns?
+
+Mark: Just a reminder that we need at least three days for full regression testing.
+
+Sarah: Noted. We’ll revisit the timeline once the API issue is resolved.
+
+Meeting End Time: 10:35 AM
