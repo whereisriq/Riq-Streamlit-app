@@ -24,8 +24,11 @@ st.set_page_config(
 )
 
 # ── Load environment and validate API key ──────────────────────────────────────
-from dotenv import load_dotenv
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, rely on system environment variables
 
 api_key_available = bool(os.getenv("GROQ_API_KEY"))
 if not api_key_available:
@@ -385,8 +388,12 @@ def fmt(val):
 
 # ── Crew runner ───────────────────────────────────────────────────────────────
 def run_crew(data, content_type: str, file_name: str) -> str:
-    from dotenv import load_dotenv
-    load_dotenv()
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass  # dotenv not installed, rely on system environment variables
+    
     from crewai import Agent, Task, Crew, Process
     from crewai.llm import LLM
 
