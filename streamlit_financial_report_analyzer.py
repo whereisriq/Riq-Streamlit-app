@@ -394,8 +394,31 @@ def run_crew(data, content_type: str, file_name: str) -> str:
     except ImportError:
         pass  # dotenv not installed, rely on system environment variables
     
-    from crewai import Agent, Task, Crew, Process
-    from crewai.llm import LLM
+    # Check for required dependencies
+    try:
+        from crewai import Agent, Task, Crew, Process
+        from crewai.llm import LLM
+    except ImportError as e:
+        st.error(f"""
+        ❌ **Missing Required Package: {str(e)}**
+        
+        CrewAI and related dependencies are not installed.
+        
+        **For Streamlit Cloud**, create a `requirements.txt` file with:
+        ```
+        crewai
+        groq
+        python-dotenv
+        pypdf
+        python-docx
+        ```
+        
+        **For Local Development**, run:
+        ```bash
+        pip install crewai groq python-dotenv pypdf python-docx
+        ```
+        """)
+        st.stop()
 
     llm = LLM(
         model="llama-3.1-8b-instant",
