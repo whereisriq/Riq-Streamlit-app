@@ -23,6 +23,23 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ── Load environment and validate API key ──────────────────────────────────────
+from dotenv import load_dotenv
+load_dotenv()
+
+api_key_available = bool(os.getenv("GROQ_API_KEY"))
+if not api_key_available:
+    st.error("""
+    ❌ **GROQ API Key Not Found**
+    
+    Please add your GROQ API key to the `.env` file:
+    ```
+    GROQ_API_KEY=your_api_key_here
+    ```
+    
+    Or set it as an environment variable before running Streamlit.
+    """)
+
 # ── CSS ───────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -468,14 +485,11 @@ with st.sidebar:
     st.markdown("### ⚙️ Configuration")
     st.markdown("---")
 
-    groq_key = st.text_input(
-        "GROQ API Key",
-        type="password",
-        value=os.getenv("GROQ_API_KEY", ""),
-        help="Paste your Groq key or add to .env",
-    )
-    if groq_key:
-        os.environ["GROQ_API_KEY"] = groq_key
+    # API Status
+    if api_key_available:
+        st.success("✅ GROQ API Key loaded from environment")
+    else:
+        st.error("❌ GROQ API Key not configured")
 
     st.markdown("---")
     st.markdown("### 💾 Export")
@@ -667,8 +681,15 @@ if uploaded:
         run_btn = st.button("🚀  Analyze & Generate Report", width='stretch')
 
         if run_btn:
-            if not os.getenv("GROQ_API_KEY"):
-                st.error("❌ Please enter your GROQ API key in the sidebar.")
+            if not api_key_available:
+                st.error("""
+                ❌ **GROQ API Key Required**
+                
+                Please add your GROQ API key to the `.env` file and restart the app:
+                ```
+                GROQ_API_KEY=your_api_key_here
+                ```
+                """)
                 st.stop()
 
             with st.spinner("🤖 Agents at work — Analyzer → Reporter…"):
