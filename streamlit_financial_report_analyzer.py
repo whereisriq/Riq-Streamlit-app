@@ -30,6 +30,22 @@ try:
 except ImportError:
     pass  # dotenv not installed, rely on system environment variables
 
+# ── Check for required dependencies early ──────────────────────────────────────
+dependencies_ok = True
+missing_modules = []
+
+try:
+    import crewai
+except ImportError:
+    dependencies_ok = False
+    missing_modules.append("crewai")
+
+try:
+    import groq
+except ImportError:
+    dependencies_ok = False
+    missing_modules.append("groq")
+
 api_key_available = bool(os.getenv("GROQ_API_KEY"))
 if not api_key_available:
     st.error("""
@@ -41,6 +57,24 @@ if not api_key_available:
     ```
     
     Or set it as an environment variable before running Streamlit.
+    """)
+
+if not dependencies_ok:
+    st.error(f"""
+    ❌ **Missing Required Packages**
+    
+    The following packages are not installed:
+    - {', '.join(missing_modules)}
+    
+    **For Local Development:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+    
+    **For Streamlit Cloud:**
+    - Ensure `requirements.txt` includes: crewai, groq
+    - Click "Rerun" after waiting for deployment to complete
+    - Check the app logs in the bottom right corner
     """)
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
@@ -719,6 +753,14 @@ if uploaded:
                 ```
                 GROQ_API_KEY=your_api_key_here
                 ```
+                """)
+                st.stop()
+            
+            if not dependencies_ok:
+                st.error(f"""
+                ❌ **Missing Packages: {', '.join(missing_modules)}**
+                
+                Please reinstall dependencies and refresh the page.
                 """)
                 st.stop()
 
